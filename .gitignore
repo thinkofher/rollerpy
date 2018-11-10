@@ -1,0 +1,8 @@
+.vscode
+
+# all notebooks
+*ipynb
+/.ipynb_checkpoints
+
+# all pyc files
+*.pyc
