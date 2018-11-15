@@ -22,17 +22,14 @@ class Curve(ABC):
             self.x[-1], self.y[-1], self.z[-1]
         ]
 
-    @abstractclassmethod
     def returnXarray(self):
-        raise NotImplementedError
+        return self.x
 
-    @abstractclassmethod
     def returnYarray(self):
-        raise NotImplementedError
+        return self.y
 
-    @abstractclassmethod
     def returnZarray(self):
-        raise NotImplementedError
+        return self.z
 
 
 class ParametricCurve(Curve, ABC):
@@ -55,3 +52,12 @@ class ParametricCurve(Curve, ABC):
         return [
             self.dx[-1], self.dy[-1], self.dz[-1]
         ]
+
+    def returndXarray(self):
+        return self.dx
+
+    def returndYarray(self):
+        return self.dy
+
+    def returndZarray(self):
+        return self.dz
