@@ -39,3 +39,32 @@ class HelixCircleParam(ParametricCurve):
         self.dx = -1*self.B*np.sin(self.t)
         self.dy = self.t*0 + self.C
         self.dz = self.A*np.cos(self.t)
+
+
+class Line(ParametricCurve):
+
+    def __init__(self, point1, point2, tmin=0, tmax=1, n=100):
+
+        self._point1 = point1
+        self._point2 = point2
+
+        self._v = [
+            (point2[0] - point1[0])/tmax,
+            (point2[1] - point1[1])/tmax,
+            (point2[2] - point1[2])/tmax
+        ]
+
+        self.t = np.linspace(tmin, tmax, n)
+
+        self._calcParameters()
+        self._calcDerivative()
+
+    def _calcParameters(self):
+        self.x = self._point1[0] + self.t*self._v[0]
+        self.y = self._point1[1] + self.t*self._v[1]
+        self.z = self._point1[2] + self.t*self._v[2]
+
+    def _calcDerivative(self):
+        self.dx = 0*self.t + (self._point2[0] - self._point1[0])/self.t[-1]
+        self.dy = 0*self.t + (self._point2[1] - self._point1[1])/self.t[-1]
+        self.dz = 0*self.t + (self._point2[2] - self._point1[2])/self.t[-1]
