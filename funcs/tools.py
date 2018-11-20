@@ -34,3 +34,13 @@ def trackTransitonCurve(point1, slope1, point2, slope2, n=100):
         curve = a + b + c + d
 
         return (curve[0], curve[1], curve[2])
+
+
+def printToSimulink(points):
+    '''
+    Printing points to copy to simulink simscape model.
+    '''
+    print('[')
+    for x, y, z in zip(points[0], points[1], points[2]):
+        print('{}, {}, {};'.format(x, y, z))
+    print(']')
