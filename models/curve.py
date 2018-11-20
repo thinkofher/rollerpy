@@ -40,7 +40,7 @@ class Curve(ABC):
         return self.t
 
 
-class ParametricCurve(Curve, ABC):
+class ParametricCurve(ABC):
 
     '''
     Class with methods for calculating derivatives of curve.
@@ -75,7 +75,7 @@ class ParametricCurve(Curve, ABC):
         return self.dz
 
 
-class NoramlizedCurve():
+class NoramlizedCurve(object):
 
     '''
     Class with methods for returing unit vectors.

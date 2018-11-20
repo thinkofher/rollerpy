@@ -1,8 +1,8 @@
-from rollerpy.models.curve import ParametricCurve, NoramlizedCurve
+from rollerpy.models.curve import Curve, ParametricCurve, NoramlizedCurve
 import numpy as np
 
 
-class HelixCircleParam(ParametricCurve, NoramlizedCurve):
+class HelixCircleParam(Curve, ParametricCurve, NoramlizedCurve):
 
     def __init__(
         self, A, B, C=1, tmin=0, tmax=np.pi, n=100, initialPosition=[0, 0, 0]
