@@ -1,5 +1,7 @@
-from rollerpy.funcs.tools import trackTransitonCurve
+from rollerpy.funcs.tools import (
+    trackTransitonCurve, printToSimulink
+    )
 
 __all__ = [
-    'trackTransitonCurve'
+    'trackTransitonCurve', 'printToSimulink'
 ]
