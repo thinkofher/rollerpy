@@ -1,7 +1,12 @@
 from abc import ABC, abstractclassmethod
+import numpy as np
 
 
 class Curve(ABC):
+
+    '''
+    A simple curve abstract class.
+    '''
 
     @abstractclassmethod
     def _calcParameters(self):
@@ -37,6 +42,10 @@ class Curve(ABC):
 
 class ParametricCurve(Curve, ABC):
 
+    '''
+    Class with methods for calculating derivatives of curve.
+    '''
+
     @abstractclassmethod
     def _calcDerivative(self):
         raise NotImplementedError
@@ -64,3 +73,25 @@ class ParametricCurve(Curve, ABC):
 
     def returndZarray(self):
         return self.dz
+
+
+class NoramlizedCurve():
+
+    '''
+    Class with methods for returing unit vectors.
+    '''
+
+    def gimmeDerivativeUnitVector(self, t):
+
+        vector = np.array(self.gimmeDerivative(t))
+        return vector/np.linalg.norm(vector)
+
+    def returnFirstDerivativeUnitVector(self):
+
+        vector = np.array(self.returnFirstDerivative())
+        return vector/np.linalg.norm(vector)
+
+    def returnLastDerivativeUnitVector(self):
+
+        vector = np.array(self.returnLastDerivative())
+        return vector/np.linalg.norm(vector)
