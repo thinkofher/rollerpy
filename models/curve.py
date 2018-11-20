@@ -14,7 +14,7 @@ class Curve(ABC):
 
     def returnFirstPoint(self):
         return [
-            self.x[1], self.y[1], self.z[1]
+            self.x[0], self.y[0], self.z[0]
         ]
 
     def returnLastPoint(self):
@@ -31,6 +31,9 @@ class Curve(ABC):
     def returnZarray(self):
         return self.z
 
+    def returnTparam(self):
+        return self.t
+
 
 class ParametricCurve(Curve, ABC):
 
@@ -45,7 +48,7 @@ class ParametricCurve(Curve, ABC):
 
     def returnFirstDerivative(self):
         return [
-            self.dx[1], self.dy[1], self.dz[1]
+            self.dx[0], self.dy[0], self.dz[0]
         ]
 
     def returnLastDerivative(self):
