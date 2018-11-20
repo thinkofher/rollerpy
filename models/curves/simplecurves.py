@@ -15,16 +15,14 @@ class HelixCircleParam(ParametricCurve):
         self.tmax = tmax
 
         # Initial positions
-        self.x0 = initialPosition[0]
-        self.y0 = initialPosition[1]
-        self.z0 = initialPosition[2]
+        self._setInitialPosition(initialPosition)
 
         # Calculations
         self.t = np.linspace(self.tmin, self.tmax, n)
         self._calcParameters()
         self._calcDerivative()
 
-    def setInitialPosition(self, initialPosition):
+    def _setInitialPosition(self, initialPosition):
 
         self.x0 = initialPosition[0]
         self.y0 = initialPosition[1]
@@ -38,6 +36,19 @@ class HelixCircleParam(ParametricCurve):
     def _calcDerivative(self):
         self.dx = -1*self.B*np.sin(self.t)
         self.dy = self.t*0 + self.C
+        self.dz = self.A*np.cos(self.t)
+
+
+class InvHelixCircleParam(HelixCircleParam):
+
+    def _calcParameters(self):
+        self.x = self.B*np.cos(self.t) + self.x0
+        self.y = -self.C*(self.t - self.tmax) + self.y0 - self.tmin
+        self.z = self.A*np.sint(self.t) + self.z0
+
+    def _calcDerivative(self):
+        self.dx = -1*self.B*np.sin(self.t)
+        self.dy = self.t*0 - self.C
         self.dz = self.A*np.cos(self.t)
 
 
