@@ -44,7 +44,7 @@ class InvHelixCircleParam(HelixCircleParam):
     def _calcParameters(self):
         self.x = self.B*np.cos(self.t) + self.x0
         self.y = -self.C*(self.t - self.tmax) + self.y0 - self.tmin
-        self.z = self.A*np.sint(self.t) + self.z0
+        self.z = self.A*np.sin(self.t) + self.z0
 
     def _calcDerivative(self):
         self.dx = -1*self.B*np.sin(self.t)
