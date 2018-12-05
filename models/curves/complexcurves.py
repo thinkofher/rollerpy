@@ -10,7 +10,25 @@ import numpy as np
 from scipy.interpolate import CubicSpline
 
 
-class SingleLoop(Curve, ParametricCurve):
+class NumericalDerivative(object):
+
+    def _calcParam_t(self):
+        try:
+            self.t = np.linspace(0, self._tparam_max, len(self.x))
+        except AttributeError:
+            self.t = np.linspace(0, 1, len(self.x))
+
+    def _calcDerivative(self):
+        self._xCubicFunc = CubicSpline(self.t, self.x)
+        self._yCubicFunc = CubicSpline(self.t, self.y)
+        self._zCubicFunc = CubicSpline(self.t, self.z)
+
+        self.dx = self._xCubicFunc(self.t, 1)
+        self.dy = self._yCubicFunc(self.t, 1)
+        self.dz = self._zCubicFunc(self.t, 1)
+
+
+class SingleLoop(NumericalDerivative, Curve, ParametricCurve):
 
     def __init__(
         self, h, A, B, lw, width_param=0.5, single_e_n=50,
@@ -53,21 +71,20 @@ class SingleLoop(Curve, ParametricCurve):
         self._calcParam_t()
         self._calcDerivative()
 
-    def _calcParam_t(self):
-        self.t = np.linspace(0, 1, len(self.x))
-
     def _calcParameters(self):
 
         xt1, yt1, zt1 = trackTransitonCurve(
             self._beginPoint, self._slopeVector,
             self._helix.returnFirstPoint(),
-            np.array(self._helix.returnFirstDerivative())*self._slopeCoeff
+            np.array(self._helix.returnFirstDerivative())*self._slopeCoeff,
+            n=self._single_e_n
         )
 
         xt2, yt2, zt2 = trackTransitonCurve(
             self._helix.returnLastPoint(),
             np.array(self._helix.returnLastDerivative())*self._slopeCoeff,
-            self._endPoint, self._slopeVector
+            self._endPoint, self._slopeVector,
+            n=self._single_e_n
         )
 
         self.x = np.append(
@@ -87,13 +104,7 @@ class SingleLoop(Curve, ParametricCurve):
         )
 
     def _calcDerivative(self):
-        self._xCubicFunc = CubicSpline(self.t, self.x)
-        self._yCubicFunc = CubicSpline(self.t, self.y)
-        self._zCubicFunc = CubicSpline(self.t, self.z)
-
-        self.dx = self._xCubicFunc(self.t, 1)
-        self.dy = self._yCubicFunc(self.t, 1)
-        self.dz = self._zCubicFunc(self.t, 1)
+        super()._calcDerivative()
 
 
 class DoubleLoop(SingleLoop):
@@ -122,14 +133,16 @@ class DoubleLoop(SingleLoop):
             self.returnLastPoint(),
             self._slopeVector,
             self._invhelix.returnFirstPoint(),
-            np.array(self._invhelix.returnFirstDerivative())*self._slopeCoeff
+            np.array(self._invhelix.returnFirstDerivative())*self._slopeCoeff,
+            n=self._single_e_n
         )
 
         xt2, yt2, zt2 = trackTransitonCurve(
             self._invhelix.returnLastPoint(),
             np.array(self._invhelix.returnLastDerivative())*self._slopeCoeff,
             self._endOfSecondLoop,
-            self._slopeVectorEnd
+            self._slopeVectorEnd,
+            n=self._single_e_n
         )
 
         self.x = np.append(
@@ -155,3 +168,65 @@ class DoubleLoop(SingleLoop):
                 )
             )
         )
+
+
+class Hill(NumericalDerivative, Curve, ParametricCurve):
+
+    def __init__(
+        self,
+        l_e1, l_e2, h,
+        lamb_s, lamb_m, lamb_e,
+        single_e_n=15, h_start=0, h_end=0
+    ):
+
+        # Points
+        self._startingPoint = [
+            h_start, 0, 0
+        ]
+        self._middlePoint = [
+            l_e1, 0, h
+        ]
+        self._endingPoint = [
+            l_e1+l_e2, 0, h_end
+        ]
+
+        # Slopes
+        self._startingSlope = [
+            lamb_s, 0, 0
+        ]
+        self._middleSlope = [
+            lamb_m, 0, 0
+        ]
+        self._endSlope = [
+            lamb_e, 0, 0
+        ]
+
+        self._single_e_n = single_e_n
+        self._calcParameters()
+        self._calcParam_t()
+        self._calcDerivative()
+
+    def _calcParameters(self):
+
+        x1, y1, z1 = trackTransitonCurve(
+            self._startingPoint,
+            self._startingSlope,
+            self._middlePoint,
+            self._middleSlope,
+            n=self._single_e_n
+        )
+        x2, y2, z2 = trackTransitonCurve(
+            self._middlePoint,
+            self._middleSlope,
+            self._endingPoint,
+            self._endSlope
+        )
+
+        # every parameter without last element of vector
+        # to make possible to interpolate vectors in future
+        self.x = np.append(x1[:-1], x2)
+        self.y = np.append(y1[:-1], y2)
+        self.z = np.append(z1[:-1], z2)
+
+    def _calcDerivative(self):
+        super()._calcDerivative()
