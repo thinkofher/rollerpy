@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.misc import derivative
 
 
 def trackTransitonCurve(point1, slope1, point2, slope2, n=100):
@@ -45,6 +46,30 @@ def printToSimulink(points):
         print('{}, {}, {};'.format(x, y, z))
     print(']')
 
-# TODO: Implement frenet
+
+def frenetFromPfuncs(t, xfunc, yfunc, zfunc):
+    '''
+    Takes t parameter and three x, y, z parametrs funcs.
+    Returns tuple with three frenet's p, n, b, unit vectors in t parameter.
+    '''
+    p = np.array([
+        derivative(xfunc, t, dx=10e-6, n=1),
+        derivative(yfunc, t, dx=10e-6, n=1),
+        derivative(zfunc, t, dx=10e-6, n=1)
+    ])
+    p = p/np.linalg.norm(p)
+
+    n = np.array([
+        derivative(xfunc, t, dx=10e-6, n=2),
+        derivative(yfunc, t, dx=10e-6, n=2),
+        derivative(zfunc, t, dx=10e-6, n=2)
+    ])
+    n = n/np.linalg.norm(n)
+
+    b = np.cross(p, n)
+    b = b/np.linalg.norm(b)
+
+    return (p, n, b)
+
 # TODO: Implement curvebycurve
 # TODO: create a function for easy visualization of track
