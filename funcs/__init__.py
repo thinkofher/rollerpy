@@ -1,7 +1,9 @@
 from .tools import (
-    trackTransitonCurve, printToSimulink
+    trackTransitonCurve, printToSimulink,
+    curveByCurve, frenetFromPfuncs
     )
 
 __all__ = [
-    'trackTransitonCurve', 'printToSimulink'
+    'trackTransitonCurve', 'printToSimulink',
+    'curveByCurve', 'frenetFromPfuncs'
 ]
