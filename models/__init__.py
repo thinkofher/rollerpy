@@ -1,5 +1,5 @@
-from rollerpy.models.curve import Curve, ParametricCurve
-from rollerpy.models.curves import (
+from .curve import Curve, ParametricCurve
+from .curves import (
     HelixCircleParam, InvHelixCircleParam, Line,
     SingleLoop, DoubleLoop, Hill
 )

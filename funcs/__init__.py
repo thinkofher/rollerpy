@@ -1,4 +1,4 @@
-from rollerpy.funcs.tools import (
+from .tools import (
     trackTransitonCurve, printToSimulink
     )
 

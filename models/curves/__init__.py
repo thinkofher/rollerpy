@@ -1,7 +1,7 @@
-from rollerpy.models.curves.simplecurves import (
+from .simplecurves import (
     HelixCircleParam, InvHelixCircleParam, Line
 )
-from rollerpy.models.curves.complexcurves import (
+from .complexcurves import (
     SingleLoop, DoubleLoop, Hill
 )
 
