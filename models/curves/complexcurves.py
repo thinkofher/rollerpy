@@ -1,9 +1,8 @@
 from rollerpy.models.curves.simplecurves import (
     HelixCircleParam,
-    InvHelixCircleParam,
-    Line
+    InvHelixCircleParam
 )
-from rollerpy.models.curve import Curve, ParametricCurve
+from rollerpy.models.cusrve import Curve, ParametricCurve
 from rollerpy.funcs import trackTransitonCurve
 
 import numpy as np
@@ -227,6 +226,20 @@ class Hill(NumericalDerivative, Curve, ParametricCurve):
         self.x = np.append(x1[:-1], x2)
         self.y = np.append(y1[:-1], y2)
         self.z = np.append(z1[:-1], z2)
+
+    def _calcDerivative(self):
+        super()._calcDerivative()
+
+
+class TransitionHelix(NumericalDerivative, Curve, ParametricCurve):
+
+    # TODO: create __init__ method
+    def __init__(self):
+        pass
+
+    # TODO: create _calcParameters method
+    def _calcParameters(self):
+        pass
 
     def _calcDerivative(self):
         super()._calcDerivative()

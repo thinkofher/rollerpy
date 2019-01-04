@@ -44,3 +44,7 @@ def printToSimulink(points):
     for x, y, z in zip(points[0], points[1], points[2]):
         print('{}, {}, {};'.format(x, y, z))
     print(']')
+
+# TODO: Implement frenet
+# TODO: Implement curvebycurve
+# TODO: create a function for easy visualization of track
