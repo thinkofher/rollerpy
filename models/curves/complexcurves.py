@@ -12,82 +12,6 @@ from scipy.misc import derivative
 
 _PI = np.pi
 
-###################################################
-# FIXME: TESTING
-def curvebycurve(linspace, basefuncs, curfuncs):
-
-    calccos = lambda a, b: np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))
-
-    xnew = []
-    ynew = []
-    znew = []
-    xb, yb, zb = globalsystem()
-    for t in linspace:
-        posbase = np.array([
-            basefuncs[0](t), basefuncs[1](t), basefuncs[2](t)
-        ])
-        poscurv = np.array([
-            curfuncs[0](t), curfuncs[1](t), curfuncs[2](t)
-        ])
-        p, n, b = frenet(t, basefuncs[0], basefuncs[1], basefuncs[2])
-
-        transmatrix = np.array(
-            [
-                [calccos(p, xb), calccos(n, xb), calccos(b, xb)],
-                [calccos(p, yb), calccos(n, yb), calccos(b, yb)],
-                [calccos(p, zb), calccos(n, zb), calccos(b, zb)],
-            ]
-        )
-        transmatrix = np.array(
-            [
-                [calccos(p, xb), calccos(p, yb), calccos(p, zb)],
-                [calccos(n, xb), calccos(n, yb), calccos(n, zb)],
-                [calccos(b, xb), calccos(b, yb), calccos(b, zb)],
-            ]
-        )
-        #transmatrix = transmatrix.transpose()
-        rotated = np.matmul(transmatrix, poscurv)
-
-        xnew.append(rotated[0] + posbase[0])
-        ynew.append(rotated[1] + posbase[1])
-        znew.append(rotated[2] + posbase[2])
-
-    return (xnew, ynew, znew)
-
-def frenet(t, xfunc, yfunc, zfunc):
-    p = np.array([
-        derivative(xfunc, t, dx=10e-6, n=1),
-        derivative(yfunc, t, dx=10e-6, n=1),
-        derivative(zfunc, t, dx=10e-6, n=1)
-    ])
-    p = p/np.linalg.norm(p)
-    n = np.array([
-        derivative(xfunc, t, dx=10e-6, n=2),
-        derivative(yfunc, t, dx=10e-6, n=2),
-        derivative(zfunc, t, dx=10e-6, n=2)
-    ])
-    n = n/np.linalg.norm(n)
-    b = np.cross(p, n)
-    b = b/np.linalg.norm(b)
-
-    return (p, n, b)
-
-
-def globalsystem():
-    x = np.array(
-        [1, 0, 0]
-    )
-    y = np.array(
-        [0, 1, 0]
-    )
-    z = np.array(
-        [0, 0, 1]
-    )
-
-    return (x, y, z)
-###################################################
-
-
 class NumericalDerivative(object):
 
     def _calcParam_t(self):
@@ -455,7 +379,7 @@ class TransitionHelix(NumericalDerivative, Curve, ParametricCurve):
         )
 
         self._finalparam = np.linspace(0, 1, self._final_n)
-        self.x, self.y, self.z = curvebycurve(
+        self.x, self.y, self.z = curveByCurve(
             self._finalparam, self._cubicSplines, self._helixOnCurve
         )
 
