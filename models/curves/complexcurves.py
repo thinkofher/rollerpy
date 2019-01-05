@@ -12,6 +12,7 @@ from scipy.misc import derivative
 
 _PI = np.pi
 
+
 class NumericalDerivative(object):
 
     def _calcParam_t(self):
