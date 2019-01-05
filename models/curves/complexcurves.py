@@ -2,11 +2,90 @@ from rollerpy.models.curves.simplecurves import (
     HelixCircleParam,
     InvHelixCircleParam
 )
-from rollerpy.models.cusrve import Curve, ParametricCurve
-from rollerpy.funcs import trackTransitonCurve
+from rollerpy.models.curve import Curve, ParametricCurve
+from rollerpy.funcs import trackTransitonCurve, curveByCurve
 
 import numpy as np
 from scipy.interpolate import CubicSpline
+from scipy.misc import derivative
+
+
+_PI = np.pi
+
+###################################################
+# FIXME: TESTING
+def curvebycurve(linspace, basefuncs, curfuncs):
+
+    calccos = lambda a, b: np.dot(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))
+
+    xnew = []
+    ynew = []
+    znew = []
+    xb, yb, zb = globalsystem()
+    for t in linspace:
+        posbase = np.array([
+            basefuncs[0](t), basefuncs[1](t), basefuncs[2](t)
+        ])
+        poscurv = np.array([
+            curfuncs[0](t), curfuncs[1](t), curfuncs[2](t)
+        ])
+        p, n, b = frenet(t, basefuncs[0], basefuncs[1], basefuncs[2])
+
+        transmatrix = np.array(
+            [
+                [calccos(p, xb), calccos(n, xb), calccos(b, xb)],
+                [calccos(p, yb), calccos(n, yb), calccos(b, yb)],
+                [calccos(p, zb), calccos(n, zb), calccos(b, zb)],
+            ]
+        )
+        transmatrix = np.array(
+            [
+                [calccos(p, xb), calccos(p, yb), calccos(p, zb)],
+                [calccos(n, xb), calccos(n, yb), calccos(n, zb)],
+                [calccos(b, xb), calccos(b, yb), calccos(b, zb)],
+            ]
+        )
+        #transmatrix = transmatrix.transpose()
+        rotated = np.matmul(transmatrix, poscurv)
+
+        xnew.append(rotated[0] + posbase[0])
+        ynew.append(rotated[1] + posbase[1])
+        znew.append(rotated[2] + posbase[2])
+
+    return (xnew, ynew, znew)
+
+def frenet(t, xfunc, yfunc, zfunc):
+    p = np.array([
+        derivative(xfunc, t, dx=10e-6, n=1),
+        derivative(yfunc, t, dx=10e-6, n=1),
+        derivative(zfunc, t, dx=10e-6, n=1)
+    ])
+    p = p/np.linalg.norm(p)
+    n = np.array([
+        derivative(xfunc, t, dx=10e-6, n=2),
+        derivative(yfunc, t, dx=10e-6, n=2),
+        derivative(zfunc, t, dx=10e-6, n=2)
+    ])
+    n = n/np.linalg.norm(n)
+    b = np.cross(p, n)
+    b = b/np.linalg.norm(b)
+
+    return (p, n, b)
+
+
+def globalsystem():
+    x = np.array(
+        [1, 0, 0]
+    )
+    y = np.array(
+        [0, 1, 0]
+    )
+    z = np.array(
+        [0, 0, 1]
+    )
+
+    return (x, y, z)
+###################################################
 
 
 class NumericalDerivative(object):
@@ -233,13 +312,153 @@ class Hill(NumericalDerivative, Curve, ParametricCurve):
 
 class TransitionHelix(NumericalDerivative, Curve, ParametricCurve):
 
-    # TODO: create __init__ method
-    def __init__(self):
-        pass
+    def __init__(
+        self, percentage, lambdas, lambdae,
+        helix_radius=45, helix_param=5,
+        diameter=20, single_n=5, final_n=10
+    ):
+        # track transition parameters
+        self._diamater = diameter
+        self._radius = diameter/2
+        self._percentage = percentage
+        self._lambdas = lambdas
+        self._lambdae = lambdae
+        self._single_n = single_n
+        self._final_n = final_n
+
+        self._hend = 0 + (1-self._percentage/2)*_PI
+        self._hstart = _PI - (1-percentage/2)*_PI
+
+        self._helixDict = {
+            'x': lambda t: self._radius*np.cos(t-0.5*_PI),
+            'y': lambda t: self._radius*np.sin(t-0.5*_PI)+self._radius,
+            'z': lambda t: t*0
+        }
+        self._dhelixDict = {
+            'x': lambda t: derivative(
+                self._helixDict['x'], t, dx=10**(-3), n=1),
+            'y': lambda t: derivative(
+                self._helixDict['y'], t, dx=10**(-3), n=1),
+            'z': lambda t: derivative(
+                self._helixDict['z'], t, dx=10**(-3), n=1),
+        }
+
+        # helix on curve parameters
+        self._helixRadius = helix_radius
+        self._helixParam = helix_param
+        self._calcParameters()
+        self._calcParam_t()
+        self._calcDerivative()
 
     # TODO: create _calcParameters method
+    def _calcCircleWithTran(self):
+
+        self._tspace = np.linspace(
+            self._hstart, self._hend, self._single_n
+        )
+        self._helixVectors = {
+            'x': self._helixDict['x'](self._tspace),
+            'y': self._helixDict['y'](self._tspace),
+            'z': self._helixDict['z'](self._tspace)
+        }
+
+        # creating start track transition curve
+        # preparing points and slopes
+        _startc_sp1 = np.array([0, 0, 0])
+        _startc_ss1 = np.array([1, 0, 0])*self._lambdas
+        _endc_ep1 = np.array([
+            self._helixDict['x'](self._hstart),
+            self._helixDict['y'](self._hstart),
+            self._helixDict['z'](self._hstart)
+        ])
+        _endc_es1 = np.array([
+            self._dhelixDict['x'](self._hstart),
+            self._dhelixDict['y'](self._hstart),
+            self._dhelixDict['z'](self._hstart)
+        ])
+
+        # x, y, z vectors for first transition curve
+        xt1, yt1, zt1 = trackTransitonCurve(
+            _startc_sp1, _startc_ss1, _endc_ep1, _endc_es1,
+            n=self._single_n
+        )
+
+        # creating end track transition curve
+        # preparing points and slopes
+        _startc_sp2 = np.array([
+            self._helixDict['x'](self._hend),
+            self._helixDict['y'](self._hend),
+            self._helixDict['z'](self._hend)
+        ])
+        _start_ss2 = np.array([
+            self._dhelixDict['x'](self._hend),
+            self._dhelixDict['y'](self._hend),
+            self._dhelixDict['z'](self._hend)
+        ])
+        _endc_ep2 = np.array([0, self._diamater, 0])
+        _endc_es2 = np.array([-1, 0, 0])*self._lambdae
+
+        # x, y, z vectors for second transition curve
+        xt2, yt2, zt2 = trackTransitonCurve(
+            _startc_sp2, _start_ss2, _endc_ep2, _endc_es2,
+            n=self._single_n
+        )
+
+        # TODO: fixed this abomination
+        # this is not actual very important
+        # it is temporary fixing some stuff
+        self._extractor = -1
+        if self._percentage > 0.75:
+            for key in self._helixVectors:
+                self._helixVectors[key] = []
+                if self._percentage < 0.9:
+                    self._extractor = len(xt1)
+                else:
+                    self._extractor = -1
+
+        self._ctx = np.append(
+            np.append(
+                xt1[:self._extractor],
+                self._helixVectors['x'][:self._extractor]
+            ), xt2
+        )
+        self._cty = np.append(
+            np.append(
+                yt1[:self._extractor],
+                self._helixVectors['y'][:self._extractor]
+            ), yt2
+        )
+        self._ctz = np.append(
+            np.append(
+                zt1[:self._extractor],
+                self._helixVectors['z'][:self._extractor]
+            ), zt2
+        )
+
     def _calcParameters(self):
-        pass
+        self._calcCircleWithTran()
+
+        self._tparam = np.linspace(0, 1, len(self._ctx))
+        self._helixOnCurve = (
+            lambda t: self._helixRadius*np.cos(
+                self._helixParam*(t+0.5*_PI)
+            ),
+            lambda t: t,
+            lambda t: self._helixRadius*np.sin(
+                self._helixParam*(t+0.5*_PI)
+            )
+        )
+        self._cubicSplines = (
+            CubicSpline(self._tparam, self._ctx),
+            CubicSpline(self._tparam, self._cty),
+            CubicSpline(self._tparam, self._ctz)
+        )
+
+        self._finalparam = np.linspace(0, 1, self._final_n)
+        self.x, self.y, self.z = curvebycurve(
+            self._finalparam, self._cubicSplines, self._helixOnCurve
+        )
 
     def _calcDerivative(self):
+        self._calcParam_t()
         super()._calcDerivative()
