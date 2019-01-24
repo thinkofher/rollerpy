@@ -2,6 +2,16 @@ from abc import ABC, abstractclassmethod
 import numpy as np
 
 
+def numpize(func):
+    '''
+    Changing function ouput from list (or other iter)
+    to numpy array
+    '''
+    def wrapper(point):
+        return np.array(point)
+    return wrapper
+
+
 class Curve(ABC):
 
     '''
@@ -12,16 +22,19 @@ class Curve(ABC):
     def _calcParameters(self):
         raise NotImplementedError
 
+    @numpize
     def gimmePoint(self, t):
         return [
             self.x[t], self.y[t], self.z[t]
             ]
 
+    @numpize
     def returnFirstPoint(self):
         return [
             self.x[0], self.y[0], self.z[0]
         ]
 
+    @numpize
     def returnLastPoint(self):
         return [
             self.x[-1], self.y[-1], self.z[-1]
@@ -39,6 +52,11 @@ class Curve(ABC):
     def returnTparam(self):
         return self.t
 
+    def setStartingPoint(self, sPoint):
+        self.x = self.x + sPoint[0]
+        self.y = self.y + sPoint[1]
+        self.z = self.z + sPoint[2]
+
 
 class ParametricCurve(ABC):
 
@@ -50,16 +68,19 @@ class ParametricCurve(ABC):
     def _calcDerivative(self):
         raise NotImplementedError
 
+    @numpize
     def gimmeDerivative(self, t):
         return [
             self.dx[t], self.dy[t], self.dz[t]
         ]
 
+    @numpize
     def returnFirstDerivative(self):
         return [
             self.dx[0], self.dy[0], self.dz[0]
         ]
 
+    @numpize
     def returnLastDerivative(self):
         return [
             self.dx[-1], self.dy[-1], self.dz[-1]
