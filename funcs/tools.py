@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.misc import derivative
-
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
+import matplotlib.pyplot as plt
 
 _GLOBALSYSTEM = (
     np.array([1, 0, 0]),
@@ -109,13 +111,6 @@ def curveByCurve(linspace, basefuncs, curfuncs):
 
         transmatrix = np.array(
             [
-                [_calcCos(p, xb), _calcCos(n, xb), _calcCos(b, xb)],
-                [_calcCos(p, yb), _calcCos(n, yb), _calcCos(b, yb)],
-                [_calcCos(p, zb), _calcCos(n, zb), _calcCos(b, zb)],
-            ]
-        )
-        transmatrix = np.array(
-            [
                 [_calcCos(p, xb), _calcCos(p, yb), _calcCos(p, zb)],
                 [_calcCos(n, xb), _calcCos(n, yb), _calcCos(n, zb)],
                 [_calcCos(b, xb), _calcCos(b, yb), _calcCos(b, zb)],
@@ -130,4 +125,20 @@ def curveByCurve(linspace, basefuncs, curfuncs):
 
     return (xnew, ynew, znew)
 
+
 # TODO: create a function for easy visualization of track
+def trackVisualize(xvec, yvec, zvec, setnormaxes=False, boundaryfactor=0.1):
+    mpl.rcParams['legend.fontsize'] = 10
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.plot(xvec, yvec, zvec, label='parametric curve')
+    if setnormaxes:
+        minlim = min(
+            min(xvec), min(yvec), min(zvec)
+        )
+        maxlim = max(
+            max(xvec), max(yvec), max(zvec)
+        )
+        minlim -= abs(minlim)*boundaryfactor
+        maxlim += abs(maxlim)*boundaryfactor
+    ax.legend()
