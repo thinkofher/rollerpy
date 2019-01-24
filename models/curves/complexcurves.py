@@ -2,7 +2,7 @@ from rollerpy.models.curves.simplecurves import (
     HelixCircleParam,
     InvHelixCircleParam
 )
-from rollerpy.models.curve import Curve, ParametricCurve
+from rollerpy.models.curve import Curve, ParametricCurve, NoramlizedCurve
 from rollerpy.funcs import trackTransitonCurve, curveByCurve
 
 import numpy as np
@@ -174,7 +174,7 @@ class DoubleLoop(SingleLoop):
         )
 
 
-class Hill(NumericalDerivative, Curve, ParametricCurve):
+class Hill(NumericalDerivative, Curve, ParametricCurve, NoramlizedCurve):
 
     def __init__(
         self,
@@ -223,7 +223,8 @@ class Hill(NumericalDerivative, Curve, ParametricCurve):
             self._middlePoint,
             self._middleSlope,
             self._endingPoint,
-            self._endSlope
+            self._endSlope,
+            n=self._single_e_n
         )
 
         # every parameter without last element of vector

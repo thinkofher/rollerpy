@@ -8,7 +8,7 @@ def numpize(func):
     to numpy array
     '''
     def wrapper(point):
-        return np.array(point)
+        return np.array(func(point))
     return wrapper
 
 
@@ -22,11 +22,10 @@ class Curve(ABC):
     def _calcParameters(self):
         raise NotImplementedError
 
-    @numpize
     def gimmePoint(self, t):
-        return [
+        return np.array([
             self.x[t], self.y[t], self.z[t]
-            ]
+            ])
 
     @numpize
     def returnFirstPoint(self):
