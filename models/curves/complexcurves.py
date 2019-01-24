@@ -64,11 +64,12 @@ class SingleLoop(NumericalDerivative, Curve, ParametricCurve):
 
         self._beginPoint = [0, -2*self._width_param, 0]
         self._endPoint = [
-            self._l1 + lw + B,
+            self._l1 + self._lw + self._B,
             2*width_param+self._helix.returnLastPoint()[1],
             0
         ]
-        self._slopeVector = [self._lambdaParam, -2*width_param, 0]
+        # self._slopeVector = [self._lambdaParam, -2*width_param, 0]
+        self._slopeVector = [self._lambdaParam, 0, 0]
 
         self._calcParameters()
         self._calcParam_t()
@@ -184,7 +185,7 @@ class Hill(NumericalDerivative, Curve, ParametricCurve):
 
         # Points
         self._startingPoint = [
-            h_start, 0, 0
+            0, 0, h_start
         ]
         self._middlePoint = [
             l_e1, 0, h
@@ -387,3 +388,4 @@ class TransitionHelix(NumericalDerivative, Curve, ParametricCurve):
     def _calcDerivative(self):
         self._calcParam_t()
         super()._calcDerivative()
+

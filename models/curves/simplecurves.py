@@ -52,7 +52,7 @@ class InvHelixCircleParam(HelixCircleParam):
         self.dz = self.A*np.cos(self.t)
 
 
-class Line(ParametricCurve, NoramlizedCurve):
+class Line(Curve, ParametricCurve, NoramlizedCurve):
 
     def __init__(self, point1, point2, tmin=0, tmax=1, n=100):
 
